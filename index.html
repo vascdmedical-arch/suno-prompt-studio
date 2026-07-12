@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Suno Prompt Studio</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%2320242a'/%3E%3Cpath d='M9 39c10-20 18 20 28 0s18 20 18 0' fill='none' stroke='%23246a9b' stroke-width='5' stroke-linecap='round'/%3E%3Cpath d='M9 25c10-20 18 20 28 0s18 20 18 0' fill='none' stroke='%23b85745' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="brand-block" aria-label="Suno Prompt Studio">
+        <div class="brand-mark" aria-hidden="true">
+          <canvas id="brandCanvas" width="48" height="48"></canvas>
+        </div>
+        <div>
+          <p class="eyebrow">Suno Prompt Studio</p>
+          <h1>曲作りプロンプト作成</h1>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="ghost-button" id="sampleButton" type="button">サンプル</button>
+        <button class="ghost-button" id="resetButton" type="button">初期化</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="input-panel" aria-label="曲の設定">
+        <div class="section-heading">
+          <span>01</span>
+          <h2>曲の核</h2>
+        </div>
+
+        <div class="field-stack">
+          <label class="field">
+            <span>タイトル</span>
+            <input id="title" name="title" autocomplete="off" placeholder="例: Midnight Archive" />
+          </label>
+
+          <label class="field">
+            <span>テーマ・情景</span>
+            <textarea
+              id="theme"
+              name="theme"
+              rows="5"
+              placeholder="曲の舞台、感情、物語、映像のイメージ"
+            ></textarea>
+          </label>
+
+          <div class="two-col">
+            <label class="field">
+              <span>ジャンル</span>
+              <select id="genre" name="genre">
+                <option value="J-pop">J-pop</option>
+                <option value="City Pop">City Pop</option>
+                <option value="Synthwave">Synthwave</option>
+                <option value="Lo-fi Hip Hop">Lo-fi Hip Hop</option>
+                <option value="Indie Rock">Indie Rock</option>
+                <option value="EDM">EDM</option>
+                <option value="R&B">R&B</option>
+                <option value="Folk">Folk</option>
+                <option value="Ambient">Ambient</option>
+                <option value="Custom">Custom</option>
+              </select>
+            </label>
+
+            <label class="field custom-genre-field" id="customGenreField">
+              <span>カスタム</span>
+              <input id="customGenre" name="customGenre" autocomplete="off" placeholder="例: shoegaze kayokyoku" />
+            </label>
+          </div>
+
+          <div class="chip-group" aria-label="ジャンル候補">
+            <button class="chip" type="button" data-genre-chip="J-pop">J-pop</button>
+            <button class="chip" type="button" data-genre-chip="City Pop">City Pop</button>
+            <button class="chip" type="button" data-genre-chip="Synthwave">Synthwave</button>
+            <button class="chip" type="button" data-genre-chip="Lo-fi Hip Hop">Lo-fi</button>
+            <button class="chip" type="button" data-genre-chip="Indie Rock">Indie Rock</button>
+            <button class="chip" type="button" data-genre-chip="EDM">EDM</button>
+          </div>
+
+          <div class="two-col">
+            <label class="field">
+              <span>ボーカル</span>
+              <select id="vocal" name="vocal">
+                <option value="female vocal">女性ボーカル</option>
+                <option value="male vocal">男性ボーカル</option>
+                <option value="duet vocals">デュエット</option>
+                <option value="choir vocals">コーラス</option>
+                <option value="rap vocal">ラップ</option>
+                <option value="instrumental">インスト</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>歌詞の言語</span>
+              <select id="lyricLanguage" name="lyricLanguage">
+                <option value="Japanese">日本語</option>
+                <option value="English">English</option>
+                <option value="Japanese and English">日本語 + English</option>
+                <option value="Korean">Korean</option>
+                <option value="Instrumental">歌詞なし</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="slider-grid" aria-label="曲調">
+            <label class="range-field">
+              <span>エネルギー</span>
+              <input id="energy" name="energy" type="range" min="1" max="10" value="6" />
+              <output id="energyValue">6</output>
+            </label>
+            <label class="range-field">
+              <span>明るさ</span>
+              <input id="brightness" name="brightness" type="range" min="1" max="10" value="6" />
+              <output id="brightnessValue">6</output>
+            </label>
+            <label class="range-field">
+              <span>温度感</span>
+              <input id="warmth" name="warmth" type="range" min="1" max="10" value="5" />
+              <output id="warmthValue">5</output>
+            </label>
+            <label class="range-field">
+              <span>複雑さ</span>
+              <input id="complexity" name="complexity" type="range" min="1" max="10" value="5" />
+              <output id="complexityValue">5</output>
+            </label>
+          </div>
+
+          <div class="two-col compact">
+            <label class="field">
+              <span>BPM</span>
+              <input id="bpm" name="bpm" type="number" min="40" max="220" value="112" />
+            </label>
+
+            <label class="field">
+              <span>拍子</span>
+              <select id="meter" name="meter">
+                <option value="4/4">4/4</option>
+                <option value="3/4">3/4</option>
+                <option value="6/8">6/8</option>
+                <option value="5/4">5/4</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div class="section-heading">
+          <span>02</span>
+          <h2>参考曲</h2>
+        </div>
+
+        <div id="referenceList" class="reference-list" aria-live="polite"></div>
+
+        <button class="add-button" id="addReferenceButton" type="button">参考曲を追加</button>
+
+        <div class="section-heading">
+          <span>03</span>
+          <h2>歌詞・構成</h2>
+        </div>
+
+        <div class="field-stack">
+          <div class="segmented" role="radiogroup" aria-label="歌詞モード">
+            <button class="segment is-active" type="button" data-lyrics-mode="outline">構成案</button>
+            <button class="segment" type="button" data-lyrics-mode="full">歌詞を書く</button>
+            <button class="segment" type="button" data-lyrics-mode="instrumental">インスト</button>
+          </div>
+
+          <label class="field" id="hookField">
+            <span>フック・決め台詞</span>
+            <input id="hook" name="hook" autocomplete="off" placeholder="サビで言わせたい一言" />
+          </label>
+
+          <label class="field">
+            <span>構成</span>
+            <input
+              id="structure"
+              name="structure"
+              autocomplete="off"
+              value="intro, verse, pre-chorus, chorus, verse, bridge, final chorus, outro"
+            />
+          </label>
+
+          <label class="field">
+            <span>楽器・音色</span>
+            <textarea
+              id="instruments"
+              name="instruments"
+              rows="3"
+              placeholder="例: glossy electric piano, tight drums, warm bass, airy synth pads"
+            ></textarea>
+          </label>
+
+          <label class="field lyric-draft-field" id="lyricDraftField">
+            <span>歌詞案</span>
+            <textarea id="lyricDraft" name="lyricDraft" rows="7" placeholder="[Verse] ..."></textarea>
+          </label>
+
+          <label class="field">
+            <span>避けたい要素</span>
+            <textarea
+              id="avoid"
+              name="avoid"
+              rows="3"
+              placeholder="例: heavy distortion, comedy tone, overly busy percussion"
+            ></textarea>
+          </label>
+        </div>
+      </section>
+
+      <aside class="output-panel" aria-label="生成結果">
+        <div class="visual-stage">
+          <canvas id="coverCanvas" width="900" height="420" aria-label="曲のビジュアルプレビュー"></canvas>
+          <div class="visual-caption">
+            <span id="captionGenre">J-pop</span>
+            <span id="captionBpm">112 BPM</span>
+          </div>
+        </div>
+
+        <div class="output-toolbar">
+          <div class="tabs" role="tablist" aria-label="出力タブ">
+            <button class="tab is-active" id="tab-final" type="button" role="tab" aria-selected="true" data-tab="final">
+              Suno
+            </button>
+            <button class="tab" id="tab-style" type="button" role="tab" aria-selected="false" data-tab="style">
+              Style
+            </button>
+            <button class="tab" id="tab-lyrics" type="button" role="tab" aria-selected="false" data-tab="lyrics">
+              Lyrics
+            </button>
+            <button class="tab" id="tab-refs" type="button" role="tab" aria-selected="false" data-tab="refs">
+              Refs
+            </button>
+            <button class="tab" id="tab-ai" type="button" role="tab" aria-selected="false" data-tab="ai">
+              AI
+            </button>
+          </div>
+          <div class="output-actions">
+            <button class="ai-button" id="aiButton" type="button">ChatGPTで考える</button>
+            <button class="ghost-button" id="applyAiButton" type="button" disabled>AIを反映</button>
+            <button class="ghost-button" id="copySunoButton" type="button">Sunoだけコピー</button>
+            <button class="copy-button" id="copyButton" type="button">コピー</button>
+          </div>
+        </div>
+
+        <div class="ai-panel">
+          <div class="ai-controls">
+            <label class="mini-field">
+              <span>AIモード</span>
+              <select id="aiMode" name="aiMode">
+                <option value="refine">プロンプトを磨く</option>
+                <option value="ideate">テーマを広げる</option>
+                <option value="lyrics">歌詞案を作る</option>
+                <option value="arrange">編曲を詰める</option>
+              </select>
+            </label>
+
+            <label class="mini-field">
+              <span>案数</span>
+              <select id="aiCount" name="aiCount">
+                <option value="1">1案</option>
+                <option value="3">3案</option>
+                <option value="5">5案</option>
+              </select>
+            </label>
+
+            <label class="mini-field">
+              <span>追加指示</span>
+              <input id="aiInstruction" name="aiInstruction" autocomplete="off" placeholder="例: もっと夜っぽく、サビは強く" />
+            </label>
+
+            <label class="mini-field api-url-field">
+              <span>API URL</span>
+              <input id="apiBase" name="apiBase" inputmode="url" autocomplete="off" placeholder="例: https://your-api.example.com" />
+            </label>
+          </div>
+          <div class="ai-status-row">
+            <span class="api-pill" id="apiStatus">API確認中</span>
+            <span class="api-pill muted" id="apiModel">model</span>
+            <button class="text-button" id="testApiButton" type="button">接続テスト</button>
+          </div>
+          <div class="history-panel">
+            <div class="history-heading">
+              <span>AI履歴</span>
+              <button class="text-button" id="clearHistoryButton" type="button">消去</button>
+            </div>
+            <div class="history-list" id="historyList"></div>
+          </div>
+        </div>
+
+        <textarea id="outputText" class="output-text" readonly spellcheck="false"></textarea>
+
+        <div class="settings-strip">
+          <label class="mini-field">
+            <span>出力</span>
+            <select id="promptLanguage" name="promptLanguage">
+              <option value="bilingual">日本語 + English</option>
+              <option value="english">English</option>
+              <option value="japanese">日本語</option>
+            </select>
+          </label>
+
+          <label class="mini-field">
+            <span>濃さ</span>
+            <select id="detailLevel" name="detailLevel">
+              <option value="balanced">標準</option>
+              <option value="compact">短め</option>
+              <option value="detailed">詳しめ</option>
+            </select>
+          </label>
+
+          <label class="check-field">
+            <input id="includeRefs" name="includeRefs" type="checkbox" checked />
+            <span>参考曲</span>
+          </label>
+        </div>
+
+        <div class="file-actions">
+          <button class="ghost-button" id="exportButton" type="button">保存</button>
+          <label class="ghost-button import-label" for="importInput">読み込み</label>
+          <input id="importInput" type="file" accept="application/json" />
+        </div>
+
+        <p class="copy-status" id="copyStatus" role="status" aria-live="polite"></p>
+      </aside>
+    </main>
+
+    <template id="referenceTemplate">
+      <article class="reference-item">
+        <div class="thumb-box" data-ref-thumb>
+          <span>REF</span>
+        </div>
+        <div class="reference-fields">
+          <div class="reference-topline">
+            <label class="field dense">
+              <span>曲名</span>
+              <input data-ref-field="title" autocomplete="off" placeholder="Title" />
+            </label>
+            <label class="field dense">
+              <span>アーティスト</span>
+              <input data-ref-field="artist" autocomplete="off" placeholder="Artist" />
+            </label>
+          </div>
+          <label class="field dense">
+            <span>YouTube URL</span>
+            <input data-ref-field="url" inputmode="url" autocomplete="off" placeholder="https://youtu.be/..." />
+          </label>
+          <div class="reference-bottomline">
+            <label class="field dense">
+              <span>参考にする点</span>
+              <select data-ref-field="focus">
+                <option value="mood">雰囲気</option>
+                <option value="arrangement">構成</option>
+                <option value="groove">グルーヴ</option>
+                <option value="sound design">音色</option>
+                <option value="lyrical tone">歌詞感</option>
+              </select>
+            </label>
+            <label class="field dense">
+              <span>メモ</span>
+              <input data-ref-field="notes" autocomplete="off" placeholder="例: rainy chorus lift" />
+            </label>
+            <button class="remove-button" type="button" data-ref-remove>削除</button>
+          </div>
+        </div>
+      </article>
+    </template>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
