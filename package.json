@@ -1,0 +1,13 @@
+{
+  "name": "suno-prompt-studio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Browser-based Suno prompt studio with a ChatGPT API backend.",
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check app.js && node --check server.js && node --check api/_shared.js && node --check api/health.js && node --check api/test.js && node --check api/refine.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
