@@ -20,6 +20,7 @@ const fields = {
   instruments: document.querySelector("#instruments"),
   lyricDraft: document.querySelector("#lyricDraft"),
   avoid: document.querySelector("#avoid"),
+  promptMode: document.querySelector("#promptMode"),
   promptLanguage: document.querySelector("#promptLanguage"),
   detailLevel: document.querySelector("#detailLevel"),
   includeRefs: document.querySelector("#includeRefs"),
@@ -51,6 +52,7 @@ const elements = {
   resetButton: document.querySelector("#resetButton"),
   exportButton: document.querySelector("#exportButton"),
   importInput: document.querySelector("#importInput"),
+  promptCounter: document.querySelector("#promptCounter"),
   captionGenre: document.querySelector("#captionGenre"),
   captionBpm: document.querySelector("#captionBpm"),
   coverCanvas: document.querySelector("#coverCanvas"),
@@ -98,6 +100,7 @@ const sampleData = {
     "glossy electric piano, tight city-pop drums, warm finger bass, airy synth pads, clean funk guitar, soft saxophone fills",
   lyricDraft: "",
   avoid: "heavy distortion, comedy tone, aggressive trap drums, copied melodies",
+  promptMode: "standard",
   promptLanguage: "bilingual",
   detailLevel: "balanced",
   includeRefs: true,
@@ -144,6 +147,7 @@ function getEmptyData() {
     instruments: "",
     lyricDraft: "",
     avoid: "",
+    promptMode: "standard",
     promptLanguage: "bilingual",
     detailLevel: "balanced",
     includeRefs: true,
@@ -185,6 +189,7 @@ function getFormData() {
     instruments: fields.instruments.value.trim(),
     lyricDraft: fields.lyricDraft.value.trim(),
     avoid: fields.avoid.value.trim(),
+    promptMode: fields.promptMode.value,
     promptLanguage: fields.promptLanguage.value,
     detailLevel: fields.detailLevel.value,
     includeRefs: fields.includeRefs.checked,
@@ -554,10 +559,33 @@ function getOutputForActiveTab(data) {
 }
 
 function buildFinalPrompt(data) {
-  if (state.appliedAiPrompt) return state.appliedAiPrompt;
-  if (data.promptLanguage === "english") return buildEnglishPrompt(data);
-  if (data.promptLanguage === "japanese") return buildJapanesePrompt(data);
-  return buildBilingualPrompt(data);
+  let prompt = "";
+  if (state.appliedAiPrompt) {
+    prompt = state.appliedAiPrompt;
+  } else if (data.promptLanguage === "english") {
+    prompt = buildEnglishPrompt(data);
+  } else if (data.promptLanguage === "japanese") {
+    prompt = buildJapanesePrompt(data);
+  } else {
+    prompt = buildBilingualPrompt(data);
+  }
+  return applyPromptMode(prompt, data);
+}
+
+function applyPromptMode(prompt, data) {
+  if (data.promptMode !== "advanced1000") return prompt;
+  return limitPromptToCharacters(prompt, 1000);
+}
+
+function limitPromptToCharacters(prompt, limit) {
+  const normalized = String(prompt).replace(/\n{3,}/g, "\n\n").trim();
+  if (Array.from(normalized).length <= limit) return normalized;
+
+  const suffix = "\n\nAvoid copying melodies, lyrics, hooks, or artist identity.";
+  const suffixLength = Array.from(suffix).length;
+  const bodyLimit = Math.max(0, limit - suffixLength);
+  const trimmedBody = Array.from(normalized).slice(0, bodyLimit).join("").replace(/\s+\S*$/, "").trimEnd();
+  return `${trimmedBody}${suffix}`;
 }
 
 function updateOutput() {
@@ -566,6 +594,7 @@ function updateOutput() {
   updateGenreChips();
   const data = getFormData();
   elements.outputText.value = getOutputForActiveTab(data);
+  updatePromptCounter(buildFinalPrompt(data), data);
   elements.applyAiButton.disabled = !state.aiEnhancedPrompt;
   elements.captionGenre.textContent = getGenre();
   elements.captionBpm.textContent = `${clampNumber(data.bpm, 40, 220, 112)} BPM`;
@@ -573,6 +602,18 @@ function updateOutput() {
   renderHistory();
   drawCover(data);
   drawBrand();
+}
+
+function updatePromptCounter(prompt, data) {
+  if (!elements.promptCounter) return;
+  const count = Array.from(prompt).length;
+  if (data.promptMode === "advanced1000") {
+    elements.promptCounter.textContent = `Suno用: ${count} / 1000文字`;
+    elements.promptCounter.classList.toggle("is-warn", count > 940);
+    return;
+  }
+  elements.promptCounter.textContent = `Suno用: ${count}文字`;
+  elements.promptCounter.classList.remove("is-warn");
 }
 
 function updateRanges() {
@@ -822,7 +863,15 @@ function setupEvents() {
 }
 
 function clearAppliedAiPromptForSongField(field) {
-  if (field === fields.aiMode || field === fields.aiCount || field === fields.aiInstruction || field === fields.apiBase) return;
+  if (
+    field === fields.aiMode ||
+    field === fields.aiCount ||
+    field === fields.aiInstruction ||
+    field === fields.promptMode ||
+    field === fields.apiBase
+  ) {
+    return;
+  }
   state.appliedAiPrompt = "";
 }
 
@@ -1096,7 +1145,7 @@ async function copyOutput() {
 
 async function copySunoPrompt() {
   const data = getFormData();
-  const text = state.aiEnhancedPrompt || buildFinalPrompt(data);
+  const text = applyPromptMode(state.aiEnhancedPrompt || buildFinalPrompt(data), data);
   await copyText(text, "Suno用プロンプトをコピーしました");
 }
 

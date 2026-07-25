@@ -76,6 +76,7 @@ function buildOpenAIPayload(body) {
       "Return only valid JSON with keys: enhancedPrompt, stylePrompt, lyricPrompt, variations, ideas, cautions.",
       "The variations key must be an array of objects with label and prompt. Return the requested number of variations.",
       "Keep enhancedPrompt ready to paste into Suno. Use English for technical music/style tags, and preserve Japanese when the song concept or lyric language is Japanese.",
+      "If songForm.promptMode is advanced1000, keep enhancedPrompt and every variation prompt within 1000 characters while preserving the strongest style, lyric, and arrangement direction.",
     ].join(" "),
     input: JSON.stringify(
       {

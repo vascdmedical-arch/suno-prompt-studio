@@ -373,8 +373,17 @@
         </div>
 
         <textarea id="outputText" class="output-text" readonly spellcheck="false"></textarea>
+        <p class="prompt-counter" id="promptCounter">Suno用: 0文字</p>
 
         <div class="settings-strip">
+          <label class="mini-field">
+            <span>Sunoモード</span>
+            <select id="promptMode" name="promptMode">
+              <option value="standard">通常</option>
+              <option value="advanced1000">Advanced 1000字</option>
+            </select>
+          </label>
+
           <label class="mini-field">
             <span>出力</span>
             <select id="promptLanguage" name="promptLanguage">

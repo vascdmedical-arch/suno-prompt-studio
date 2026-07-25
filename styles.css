@@ -684,6 +684,19 @@ output {
   line-height: 1.6;
 }
 
+.prompt-counter {
+  min-height: 1.15rem;
+  margin: -0.32rem 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 850;
+  text-align: right;
+}
+
+.prompt-counter.is-warn {
+  color: var(--coral);
+}
+
 .settings-strip {
   justify-content: space-between;
   padding: 0.74rem;
