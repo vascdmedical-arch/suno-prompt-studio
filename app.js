@@ -1,6 +1,7 @@
 const STORAGE_KEY = "suno-prompt-studio:v1";
 const HISTORY_KEY = "suno-prompt-studio:history:v1";
 const API_BASE_KEY = "suno-prompt-studio:api-base:v1";
+const DEFAULT_API_BASE = "https://suno-prompt-studio-api.onrender.com";
 
 const fields = {
   title: document.querySelector("#title"),
@@ -879,9 +880,15 @@ function getApiBase() {
   const paramBase = new URLSearchParams(window.location.search).get("api");
   if (paramBase) return paramBase.replace(/\/$/, "");
   const savedBase = localStorage.getItem(API_BASE_KEY);
-  if (savedBase) return savedBase.replace(/\/$/, "");
-  if (window.location.protocol === "file:") return "http://127.0.0.1:4173";
-  return "";
+  if (savedBase) {
+    const normalizedSavedBase = savedBase.replace(/\/$/, "");
+    if (/^https?:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/i.test(normalizedSavedBase)) {
+      localStorage.removeItem(API_BASE_KEY);
+      return DEFAULT_API_BASE;
+    }
+    return normalizedSavedBase;
+  }
+  return DEFAULT_API_BASE;
 }
 
 function setApiBase(value) {
