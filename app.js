@@ -1026,8 +1026,8 @@ function formatHistoryMeta(item) {
 
 function translateAiMode(mode) {
   const map = {
-    refine: "磨く",
-    ideate: "広げる",
+    refine: "完成プロンプト",
+    ideate: "方向性",
     lyrics: "歌詞",
     arrange: "編曲",
   };
@@ -1049,7 +1049,7 @@ function escapeHtml(value) {
 
 function setAiBusy(isBusy) {
   elements.aiButton.disabled = isBusy || !state.apiReady;
-  elements.aiButton.textContent = isBusy ? "考え中" : "ChatGPTで考える";
+  elements.aiButton.textContent = isBusy ? "作成中" : "ChatGPTで作る";
 }
 
 function formatAiResult(result) {

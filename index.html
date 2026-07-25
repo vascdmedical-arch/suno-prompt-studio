@@ -54,15 +54,70 @@
             <label class="field">
               <span>ジャンル</span>
               <select id="genre" name="genre">
-                <option value="J-pop">J-pop</option>
-                <option value="City Pop">City Pop</option>
-                <option value="Synthwave">Synthwave</option>
-                <option value="Lo-fi Hip Hop">Lo-fi Hip Hop</option>
-                <option value="Indie Rock">Indie Rock</option>
-                <option value="EDM">EDM</option>
-                <option value="R&B">R&B</option>
-                <option value="Folk">Folk</option>
-                <option value="Ambient">Ambient</option>
+                <optgroup label="日本・韓国ポップ">
+                  <option value="J-pop">J-pop</option>
+                  <option value="K-pop">K-pop</option>
+                  <option value="City Pop">City Pop</option>
+                  <option value="Anime Song">Anime Song</option>
+                  <option value="Vocaloid">Vocaloid</option>
+                  <option value="Idol Pop">Idol Pop</option>
+                  <option value="Kayokyoku">Kayokyoku</option>
+                  <option value="J-rock">J-rock</option>
+                  <option value="Band Pop">Band Pop</option>
+                </optgroup>
+                <optgroup label="ポップ・歌もの">
+                  <option value="Pop Ballad">Pop Ballad</option>
+                  <option value="Acoustic Pop">Acoustic Pop</option>
+                  <option value="Dance Pop">Dance Pop</option>
+                  <option value="Indie Pop">Indie Pop</option>
+                  <option value="Dream Pop">Dream Pop</option>
+                  <option value="Folk Pop">Folk Pop</option>
+                  <option value="Piano Ballad">Piano Ballad</option>
+                </optgroup>
+                <optgroup label="R&B・ジャズ・ソウル">
+                  <option value="R&B">R&B</option>
+                  <option value="Neo Soul">Neo Soul</option>
+                  <option value="Jazz Pop">Jazz Pop</option>
+                  <option value="Soul">Soul</option>
+                  <option value="Funk">Funk</option>
+                  <option value="Disco">Disco</option>
+                  <option value="Bossa Nova">Bossa Nova</option>
+                </optgroup>
+                <optgroup label="ダンス・電子音楽">
+                  <option value="EDM">EDM</option>
+                  <option value="House">House</option>
+                  <option value="Future Bass">Future Bass</option>
+                  <option value="Synthwave">Synthwave</option>
+                  <option value="Techno">Techno</option>
+                  <option value="UK Garage">UK Garage</option>
+                  <option value="Drum and Bass">Drum and Bass</option>
+                  <option value="Hyperpop">Hyperpop</option>
+                  <option value="Lo-fi Hip Hop">Lo-fi Hip Hop</option>
+                </optgroup>
+                <optgroup label="ロック・オルタナ">
+                  <option value="Indie Rock">Indie Rock</option>
+                  <option value="Alternative Rock">Alternative Rock</option>
+                  <option value="Shoegaze">Shoegaze</option>
+                  <option value="Post Rock">Post Rock</option>
+                  <option value="Punk Pop">Punk Pop</option>
+                  <option value="Metalcore">Metalcore</option>
+                </optgroup>
+                <optgroup label="ヒップホップ・ワールド">
+                  <option value="Hip Hop">Hip Hop</option>
+                  <option value="Trap">Trap</option>
+                  <option value="Rap Pop">Rap Pop</option>
+                  <option value="Reggaeton">Reggaeton</option>
+                  <option value="Latin Pop">Latin Pop</option>
+                  <option value="Afrobeats">Afrobeats</option>
+                  <option value="Amapiano">Amapiano</option>
+                </optgroup>
+                <optgroup label="映像・雰囲気">
+                  <option value="Ambient">Ambient</option>
+                  <option value="Cinematic Pop">Cinematic Pop</option>
+                  <option value="Orchestral Pop">Orchestral Pop</option>
+                  <option value="Chillout">Chillout</option>
+                  <option value="New Age">New Age</option>
+                </optgroup>
                 <option value="Custom">Custom</option>
               </select>
             </label>
@@ -75,11 +130,22 @@
 
           <div class="chip-group" aria-label="ジャンル候補">
             <button class="chip" type="button" data-genre-chip="J-pop">J-pop</button>
+            <button class="chip" type="button" data-genre-chip="K-pop">K-pop</button>
             <button class="chip" type="button" data-genre-chip="City Pop">City Pop</button>
+            <button class="chip" type="button" data-genre-chip="Anime Song">Anime</button>
+            <button class="chip" type="button" data-genre-chip="Vocaloid">Vocaloid</button>
+            <button class="chip" type="button" data-genre-chip="Pop Ballad">Ballad</button>
+            <button class="chip" type="button" data-genre-chip="R&B">R&B</button>
+            <button class="chip" type="button" data-genre-chip="Jazz Pop">Jazz Pop</button>
+            <button class="chip" type="button" data-genre-chip="Funk">Funk</button>
+            <button class="chip" type="button" data-genre-chip="Future Bass">Future Bass</button>
+            <button class="chip" type="button" data-genre-chip="House">House</button>
             <button class="chip" type="button" data-genre-chip="Synthwave">Synthwave</button>
             <button class="chip" type="button" data-genre-chip="Lo-fi Hip Hop">Lo-fi</button>
             <button class="chip" type="button" data-genre-chip="Indie Rock">Indie Rock</button>
-            <button class="chip" type="button" data-genre-chip="EDM">EDM</button>
+            <button class="chip" type="button" data-genre-chip="Shoegaze">Shoegaze</button>
+            <button class="chip" type="button" data-genre-chip="Hip Hop">Hip Hop</button>
+            <button class="chip" type="button" data-genre-chip="Cinematic Pop">Cinematic</button>
           </div>
 
           <div class="two-col">
@@ -107,45 +173,50 @@
             </label>
           </div>
 
-          <div class="slider-grid" aria-label="曲調">
-            <label class="range-field">
-              <span>エネルギー</span>
-              <input id="energy" name="energy" type="range" min="1" max="10" value="6" />
-              <output id="energyValue">6</output>
-            </label>
-            <label class="range-field">
-              <span>明るさ</span>
-              <input id="brightness" name="brightness" type="range" min="1" max="10" value="6" />
-              <output id="brightnessValue">6</output>
-            </label>
-            <label class="range-field">
-              <span>温度感</span>
-              <input id="warmth" name="warmth" type="range" min="1" max="10" value="5" />
-              <output id="warmthValue">5</output>
-            </label>
-            <label class="range-field">
-              <span>複雑さ</span>
-              <input id="complexity" name="complexity" type="range" min="1" max="10" value="5" />
-              <output id="complexityValue">5</output>
-            </label>
-          </div>
+          <details class="advanced-group">
+            <summary>細かい曲調</summary>
+            <div class="advanced-content">
+              <div class="slider-grid" aria-label="曲調">
+                <label class="range-field">
+                  <span>エネルギー</span>
+                  <input id="energy" name="energy" type="range" min="1" max="10" value="6" />
+                  <output id="energyValue">6</output>
+                </label>
+                <label class="range-field">
+                  <span>明るさ</span>
+                  <input id="brightness" name="brightness" type="range" min="1" max="10" value="6" />
+                  <output id="brightnessValue">6</output>
+                </label>
+                <label class="range-field">
+                  <span>温度感</span>
+                  <input id="warmth" name="warmth" type="range" min="1" max="10" value="5" />
+                  <output id="warmthValue">5</output>
+                </label>
+                <label class="range-field">
+                  <span>複雑さ</span>
+                  <input id="complexity" name="complexity" type="range" min="1" max="10" value="5" />
+                  <output id="complexityValue">5</output>
+                </label>
+              </div>
 
-          <div class="two-col compact">
-            <label class="field">
-              <span>BPM</span>
-              <input id="bpm" name="bpm" type="number" min="40" max="220" value="112" />
-            </label>
+              <div class="two-col compact">
+                <label class="field">
+                  <span>BPM</span>
+                  <input id="bpm" name="bpm" type="number" min="40" max="220" value="112" />
+                </label>
 
-            <label class="field">
-              <span>拍子</span>
-              <select id="meter" name="meter">
-                <option value="4/4">4/4</option>
-                <option value="3/4">3/4</option>
-                <option value="6/8">6/8</option>
-                <option value="5/4">5/4</option>
-              </select>
-            </label>
-          </div>
+                <label class="field">
+                  <span>拍子</span>
+                  <select id="meter" name="meter">
+                    <option value="4/4">4/4</option>
+                    <option value="3/4">3/4</option>
+                    <option value="6/8">6/8</option>
+                    <option value="5/4">5/4</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+          </details>
         </div>
 
         <div class="section-heading">
@@ -174,40 +245,45 @@
             <input id="hook" name="hook" autocomplete="off" placeholder="サビで言わせたい一言" />
           </label>
 
-          <label class="field">
-            <span>構成</span>
-            <input
-              id="structure"
-              name="structure"
-              autocomplete="off"
-              value="intro, verse, pre-chorus, chorus, verse, bridge, final chorus, outro"
-            />
-          </label>
-
-          <label class="field">
-            <span>楽器・音色</span>
-            <textarea
-              id="instruments"
-              name="instruments"
-              rows="3"
-              placeholder="例: glossy electric piano, tight drums, warm bass, airy synth pads"
-            ></textarea>
-          </label>
-
           <label class="field lyric-draft-field" id="lyricDraftField">
             <span>歌詞案</span>
             <textarea id="lyricDraft" name="lyricDraft" rows="7" placeholder="[Verse] ..."></textarea>
           </label>
 
-          <label class="field">
-            <span>避けたい要素</span>
-            <textarea
-              id="avoid"
-              name="avoid"
-              rows="3"
-              placeholder="例: heavy distortion, comedy tone, overly busy percussion"
-            ></textarea>
-          </label>
+          <details class="advanced-group">
+            <summary>構成・音色の細かい指定</summary>
+            <div class="advanced-content">
+              <label class="field">
+                <span>構成</span>
+                <input
+                  id="structure"
+                  name="structure"
+                  autocomplete="off"
+                  value="intro, verse, pre-chorus, chorus, verse, bridge, final chorus, outro"
+                />
+              </label>
+
+              <label class="field">
+                <span>楽器・音色</span>
+                <textarea
+                  id="instruments"
+                  name="instruments"
+                  rows="3"
+                  placeholder="例: glossy electric piano, tight drums, warm bass, airy synth pads"
+                ></textarea>
+              </label>
+
+              <label class="field">
+                <span>避けたい要素</span>
+                <textarea
+                  id="avoid"
+                  name="avoid"
+                  rows="3"
+                  placeholder="例: heavy distortion, comedy tone, overly busy percussion"
+                ></textarea>
+              </label>
+            </div>
+          </details>
         </div>
       </section>
 
@@ -223,43 +299,43 @@
         <div class="output-toolbar">
           <div class="tabs" role="tablist" aria-label="出力タブ">
             <button class="tab is-active" id="tab-final" type="button" role="tab" aria-selected="true" data-tab="final">
-              Suno
+              完成プロンプト
             </button>
             <button class="tab" id="tab-style" type="button" role="tab" aria-selected="false" data-tab="style">
-              Style
+              スタイル
             </button>
             <button class="tab" id="tab-lyrics" type="button" role="tab" aria-selected="false" data-tab="lyrics">
-              Lyrics
+              歌詞
             </button>
             <button class="tab" id="tab-refs" type="button" role="tab" aria-selected="false" data-tab="refs">
-              Refs
+              参考曲
             </button>
             <button class="tab" id="tab-ai" type="button" role="tab" aria-selected="false" data-tab="ai">
-              AI
+              AI結果
             </button>
           </div>
           <div class="output-actions">
-            <button class="ai-button" id="aiButton" type="button">ChatGPTで考える</button>
-            <button class="ghost-button" id="applyAiButton" type="button" disabled>AIを反映</button>
-            <button class="ghost-button" id="copySunoButton" type="button">Sunoだけコピー</button>
-            <button class="copy-button" id="copyButton" type="button">コピー</button>
+            <button class="ai-button" id="aiButton" type="button">ChatGPTで作る</button>
+            <button class="ghost-button" id="applyAiButton" type="button" disabled>AI案を使う</button>
+            <button class="ghost-button" id="copySunoButton" type="button">Suno用をコピー</button>
+            <button class="copy-button" id="copyButton" type="button">表示中をコピー</button>
           </div>
         </div>
 
         <div class="ai-panel">
           <div class="ai-controls">
             <label class="mini-field">
-              <span>AIモード</span>
+              <span>ChatGPTに頼む内容</span>
               <select id="aiMode" name="aiMode">
-                <option value="refine">プロンプトを磨く</option>
-                <option value="ideate">テーマを広げる</option>
+                <option value="refine">完成プロンプトに整える</option>
+                <option value="ideate">曲の方向性を広げる</option>
                 <option value="lyrics">歌詞案を作る</option>
                 <option value="arrange">編曲を詰める</option>
               </select>
             </label>
 
             <label class="mini-field">
-              <span>案数</span>
+              <span>出す案の数</span>
               <select id="aiCount" name="aiCount">
                 <option value="1">1案</option>
                 <option value="3">3案</option>
@@ -271,24 +347,29 @@
               <span>追加指示</span>
               <input id="aiInstruction" name="aiInstruction" autocomplete="off" placeholder="例: もっと夜っぽく、サビは強く" />
             </label>
+          </div>
 
-            <label class="mini-field api-url-field">
-              <span>API URL</span>
-              <input id="apiBase" name="apiBase" inputmode="url" autocomplete="off" placeholder="例: https://your-api.example.com" />
-            </label>
-          </div>
-          <div class="ai-status-row">
-            <span class="api-pill" id="apiStatus">API確認中</span>
-            <span class="api-pill muted" id="apiModel">model</span>
-            <button class="text-button" id="testApiButton" type="button">接続テスト</button>
-          </div>
-          <div class="history-panel">
-            <div class="history-heading">
-              <span>AI履歴</span>
-              <button class="text-button" id="clearHistoryButton" type="button">消去</button>
+          <details class="connection-panel">
+            <summary>接続と履歴</summary>
+            <div class="connection-content">
+              <label class="mini-field api-url-field">
+                <span>API URL</span>
+                <input id="apiBase" name="apiBase" inputmode="url" autocomplete="off" placeholder="例: https://your-api.example.com" />
+              </label>
+              <div class="ai-status-row">
+                <span class="api-pill" id="apiStatus">API確認中</span>
+                <span class="api-pill muted" id="apiModel">model</span>
+                <button class="text-button" id="testApiButton" type="button">接続テスト</button>
+              </div>
+              <div class="history-panel">
+                <div class="history-heading">
+                  <span>AI履歴</span>
+                  <button class="text-button" id="clearHistoryButton" type="button">消去</button>
+                </div>
+                <div class="history-list" id="historyList"></div>
+              </div>
             </div>
-            <div class="history-list" id="historyList"></div>
-          </div>
+          </details>
         </div>
 
         <textarea id="outputText" class="output-text" readonly spellcheck="false"></textarea>
