@@ -702,26 +702,28 @@ output {
   grid-template-columns: auto minmax(8rem, 1fr) minmax(8rem, 1fr);
   gap: 0.5rem;
   align-items: center;
-  padding: 0.62rem;
-  border: 1px solid rgba(32, 36, 42, 0.12);
+  padding: 0.72rem;
+  border: 2px solid rgba(36, 106, 155, 0.26);
   border-radius: var(--radius);
-  background: rgba(255, 253, 247, 0.7);
+  background: rgba(255, 253, 247, 0.94);
+  box-shadow: 0 10px 24px rgba(32, 36, 42, 0.08);
 }
 
 .prompt-mode-label {
-  color: #49515b;
-  font-size: 0.78rem;
+  color: var(--blue-deep);
+  font-size: 0.9rem;
   font-weight: 900;
 }
 
 .mode-option {
   display: grid;
-  min-height: 3.05rem;
+  min-height: 3.25rem;
   place-items: center;
   border: 1px solid rgba(32, 36, 42, 0.16);
   border-radius: var(--radius);
   color: var(--ink);
   background: rgba(255, 253, 247, 0.88);
+  box-shadow: inset 0 0 0 1px rgba(255, 253, 247, 0.7);
   font-weight: 900;
 }
 

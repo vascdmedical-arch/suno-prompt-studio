@@ -322,6 +322,19 @@
           </div>
         </div>
 
+        <div class="prompt-mode-panel" role="radiogroup" aria-label="Suno文字数モード">
+          <input id="promptMode" name="promptMode" type="hidden" value="simple3000" />
+          <span class="prompt-mode-label">文字数モード</span>
+          <button class="mode-option is-active" type="button" data-prompt-mode="simple3000" aria-pressed="true">
+            シンプル
+            <span>3000字</span>
+          </button>
+          <button class="mode-option" type="button" data-prompt-mode="advanced1000" aria-pressed="false">
+            アドバンス
+            <span>1000字</span>
+          </button>
+        </div>
+
         <div class="ai-panel">
           <div class="ai-controls">
             <label class="mini-field">
@@ -370,19 +383,6 @@
               </div>
             </div>
           </details>
-        </div>
-
-        <div class="prompt-mode-panel" role="radiogroup" aria-label="Suno文字数モード">
-          <input id="promptMode" name="promptMode" type="hidden" value="simple3000" />
-          <span class="prompt-mode-label">Sunoモード</span>
-          <button class="mode-option is-active" type="button" data-prompt-mode="simple3000" aria-pressed="true">
-            シンプル
-            <span>3000字</span>
-          </button>
-          <button class="mode-option" type="button" data-prompt-mode="advanced1000" aria-pressed="false">
-            アドバンス
-            <span>1000字</span>
-          </button>
         </div>
 
         <textarea id="outputText" class="output-text" readonly spellcheck="false"></textarea>
