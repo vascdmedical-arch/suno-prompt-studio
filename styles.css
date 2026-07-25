@@ -697,6 +697,50 @@ output {
   color: var(--coral);
 }
 
+.prompt-mode-panel {
+  display: grid;
+  grid-template-columns: auto minmax(8rem, 1fr) minmax(8rem, 1fr);
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.62rem;
+  border: 1px solid rgba(32, 36, 42, 0.12);
+  border-radius: var(--radius);
+  background: rgba(255, 253, 247, 0.7);
+}
+
+.prompt-mode-label {
+  color: #49515b;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.mode-option {
+  display: grid;
+  min-height: 3.05rem;
+  place-items: center;
+  border: 1px solid rgba(32, 36, 42, 0.16);
+  border-radius: var(--radius);
+  color: var(--ink);
+  background: rgba(255, 253, 247, 0.88);
+  font-weight: 900;
+}
+
+.mode-option span {
+  color: var(--muted);
+  font-size: 0.73rem;
+  font-weight: 850;
+}
+
+.mode-option.is-active {
+  border-color: transparent;
+  color: #fffdf7;
+  background: var(--blue-deep);
+}
+
+.mode-option.is-active span {
+  color: rgba(255, 253, 247, 0.86);
+}
+
 .settings-strip {
   justify-content: space-between;
   padding: 0.74rem;
@@ -819,6 +863,14 @@ output {
   .output-actions {
     display: grid;
     grid-template-columns: 1fr 1fr;
+  }
+
+  .prompt-mode-panel {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .prompt-mode-label {
+    grid-column: 1 / -1;
   }
 
   .ai-controls {

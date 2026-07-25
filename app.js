@@ -101,7 +101,7 @@ const sampleData = {
     "glossy electric piano, tight city-pop drums, warm finger bass, airy synth pads, clean funk guitar, soft saxophone fills",
   lyricDraft: "",
   avoid: "heavy distortion, comedy tone, aggressive trap drums, copied melodies",
-  promptMode: "standard",
+  promptMode: "simple3000",
   promptLanguage: "bilingual",
   detailLevel: "balanced",
   includeRefs: true,
@@ -148,7 +148,7 @@ function getEmptyData() {
     instruments: "",
     lyricDraft: "",
     avoid: "",
-    promptMode: "standard",
+    promptMode: "simple3000",
     promptLanguage: "bilingual",
     detailLevel: "balanced",
     includeRefs: true,
@@ -190,7 +190,7 @@ function getFormData() {
     instruments: fields.instruments.value.trim(),
     lyricDraft: fields.lyricDraft.value.trim(),
     avoid: fields.avoid.value.trim(),
-    promptMode: fields.promptMode.value,
+    promptMode: normalizePromptMode(fields.promptMode.value),
     promptLanguage: fields.promptLanguage.value,
     detailLevel: fields.detailLevel.value,
     includeRefs: fields.includeRefs.checked,
@@ -204,6 +204,7 @@ function getFormData() {
 
 function applyFormData(data) {
   const merged = { ...getEmptyData(), ...data };
+  merged.promptMode = normalizePromptMode(merged.promptMode);
   state.aiText = "";
   state.aiEnhancedPrompt = "";
   state.appliedAiPrompt = "";
@@ -574,8 +575,16 @@ function buildFinalPrompt(data) {
 }
 
 function applyPromptMode(prompt, data) {
-  if (data.promptMode !== "advanced1000") return prompt;
-  return limitPromptToCharacters(prompt, 1000);
+  return limitPromptToCharacters(prompt, getPromptLimit(data.promptMode));
+}
+
+function normalizePromptMode(mode) {
+  if (mode === "advanced1000") return "advanced1000";
+  return "simple3000";
+}
+
+function getPromptLimit(mode) {
+  return normalizePromptMode(mode) === "advanced1000" ? 1000 : 3000;
 }
 
 function limitPromptToCharacters(prompt, limit) {
@@ -593,6 +602,7 @@ function updateOutput() {
   updateRanges();
   updateConditionalFields();
   updateGenreChips();
+  updatePromptModeButtons();
   const data = getFormData();
   elements.outputText.value = getOutputForActiveTab(data);
   updatePromptCounter(buildFinalPrompt(data), data);
@@ -608,13 +618,9 @@ function updateOutput() {
 function updatePromptCounter(prompt, data) {
   if (!elements.promptCounter) return;
   const count = Array.from(prompt).length;
-  if (data.promptMode === "advanced1000") {
-    elements.promptCounter.textContent = `Suno用: ${count} / 1000文字`;
-    elements.promptCounter.classList.toggle("is-warn", count > 940);
-    return;
-  }
-  elements.promptCounter.textContent = `Suno用: ${count}文字`;
-  elements.promptCounter.classList.remove("is-warn");
+  const limit = getPromptLimit(data.promptMode);
+  elements.promptCounter.textContent = `Suno用: ${count} / ${limit}文字`;
+  elements.promptCounter.classList.toggle("is-warn", count > limit * 0.94);
 }
 
 function updateRanges() {
@@ -639,6 +645,16 @@ function updateGenreChips() {
 function updateModeButtons() {
   document.querySelectorAll("[data-lyrics-mode]").forEach((button) => {
     button.classList.toggle("is-active", button.dataset.lyricsMode === state.lyricsMode);
+  });
+}
+
+function updatePromptModeButtons() {
+  const mode = normalizePromptMode(fields.promptMode.value);
+  fields.promptMode.value = mode;
+  document.querySelectorAll("[data-prompt-mode]").forEach((button) => {
+    const isActive = button.dataset.promptMode === mode;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
   });
 }
 
@@ -832,6 +848,13 @@ function setupEvents() {
     button.addEventListener("click", () => {
       state.lyricsMode = button.dataset.lyricsMode;
       updateModeButtons();
+      updateOutput();
+    });
+  });
+
+  document.querySelectorAll("[data-prompt-mode]").forEach((button) => {
+    button.addEventListener("click", () => {
+      fields.promptMode.value = normalizePromptMode(button.dataset.promptMode);
       updateOutput();
     });
   });
