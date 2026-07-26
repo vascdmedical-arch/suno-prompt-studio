@@ -85,7 +85,7 @@ const sampleData = {
   title: "Neon Rain Letters",
   theme:
     "終電後の街で、送れなかったメッセージを読み返す。雨上がりの反射、少しだけ前向きな孤独、朝が来る直前の透明感。",
-  genre: "City Pop",
+  genre: ["City Pop"],
   customGenre: "",
   vocal: "female vocal",
   lyricLanguage: "Japanese and English",
@@ -133,7 +133,7 @@ function getEmptyData() {
   return {
     title: "",
     theme: "",
-    genre: "J-pop",
+    genre: ["J-pop"],
     customGenre: "",
     vocal: "female vocal",
     lyricLanguage: "Japanese",
@@ -165,17 +165,14 @@ function createId() {
 }
 
 function getGenre() {
-  if (fields.genre.value === "Custom") {
-    return fields.customGenre.value.trim() || "custom pop";
-  }
-  return fields.genre.value;
+  return getGenreLabel(getFormData());
 }
 
 function getFormData() {
   return {
     title: fields.title.value.trim(),
     theme: fields.theme.value.trim(),
-    genre: fields.genre.value,
+    genre: getSelectedGenres(),
     customGenre: fields.customGenre.value.trim(),
     vocal: fields.vocal.value,
     lyricLanguage: fields.lyricLanguage.value,
@@ -205,6 +202,7 @@ function getFormData() {
 function applyFormData(data) {
   const merged = { ...getEmptyData(), ...data };
   merged.promptMode = normalizePromptMode(merged.promptMode);
+  merged.genre = normalizeGenreList(merged.genre);
   state.aiText = "";
   state.aiEnhancedPrompt = "";
   state.appliedAiPrompt = "";
@@ -213,6 +211,8 @@ function applyFormData(data) {
   Object.entries(fields).forEach(([key, field]) => {
     if (field.type === "checkbox") {
       field.checked = Boolean(merged[key]);
+    } else if (key === "genre") {
+      setSelectedGenres(merged.genre);
     } else if (key === "apiBase") {
       field.value = apiBase;
     } else {
@@ -226,6 +226,46 @@ function applyFormData(data) {
   renderReferences();
   updateModeButtons();
   updateOutput();
+}
+
+function getSelectedGenres() {
+  const selected = Array.from(fields.genre.selectedOptions).map((option) => option.value);
+  return selected.length ? selected : ["J-pop"];
+}
+
+function setSelectedGenres(genres) {
+  const normalized = normalizeGenreList(genres);
+  Array.from(fields.genre.options).forEach((option) => {
+    option.selected = normalized.includes(option.value);
+  });
+  if (!Array.from(fields.genre.selectedOptions).length) {
+    const fallback = Array.from(fields.genre.options).find((option) => option.value === "J-pop");
+    if (fallback) fallback.selected = true;
+  }
+}
+
+function normalizeGenreList(genre) {
+  const values = Array.isArray(genre)
+    ? genre
+    : String(genre || "J-pop")
+        .split(",")
+        .map((item) => item.trim());
+  const unique = [];
+  values.forEach((value) => {
+    if (value && !unique.includes(value)) unique.push(value);
+  });
+  return unique.length ? unique : ["J-pop"];
+}
+
+function getGenreList(data) {
+  const values = normalizeGenreList(data.genre);
+  const customGenre = data.customGenre || "custom pop";
+  const genres = values.map((genre) => (genre === "Custom" ? customGenre : genre)).filter(Boolean);
+  return genres.length ? genres : ["J-pop"];
+}
+
+function getGenreLabel(data) {
+  return getGenreList(data).join(", ");
 }
 
 function normalizeReference(ref) {
@@ -344,7 +384,7 @@ function adjectiveScale(value, low, mid, high) {
 }
 
 function buildStyleTags(data) {
-  const genre = data.genre === "Custom" ? data.customGenre || "custom pop" : data.genre;
+  const genre = getGenreLabel(data);
   const energy = adjectiveScale(data.energy, "low-key", "steady", "high-energy");
   const brightness = adjectiveScale(data.brightness, "shadowy", "balanced", "bright");
   const warmth = adjectiveScale(data.warmth, "cool-toned", "warm", "sunlit");
@@ -520,7 +560,7 @@ function trimForDetail(sections, detailLevel) {
 }
 
 function buildStyleOutput(data) {
-  const genre = data.genre === "Custom" ? data.customGenre || "custom pop" : data.genre;
+  const genre = getGenreLabel(data);
   const refs = buildReferenceLines(data, "en");
   return [
     buildStyleTags(data),
@@ -607,7 +647,7 @@ function updateOutput() {
   elements.outputText.value = getOutputForActiveTab(data);
   updatePromptCounter(buildFinalPrompt(data), data);
   elements.applyAiButton.disabled = !state.aiEnhancedPrompt;
-  elements.captionGenre.textContent = getGenre();
+  elements.captionGenre.textContent = getGenreLabel(data);
   elements.captionBpm.textContent = `${clampNumber(data.bpm, 40, 220, 112)} BPM`;
   saveState();
   renderHistory();
@@ -630,16 +670,32 @@ function updateRanges() {
 }
 
 function updateConditionalFields() {
-  elements.customGenreField.classList.toggle("is-visible", fields.genre.value === "Custom");
+  elements.customGenreField.classList.toggle("is-visible", getSelectedGenres().includes("Custom"));
   const showDraft = state.lyricsMode === "full";
   elements.lyricDraftField.classList.toggle("is-visible", showDraft);
   elements.hookField.style.display = state.lyricsMode === "instrumental" ? "none" : "";
 }
 
 function updateGenreChips() {
+  const selected = getSelectedGenres();
   document.querySelectorAll("[data-genre-chip]").forEach((button) => {
-    button.classList.toggle("is-active", button.dataset.genreChip === fields.genre.value);
+    const isActive = selected.includes(button.dataset.genreChip);
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
   });
+}
+
+function toggleGenre(value) {
+  const options = Array.from(fields.genre.options);
+  const option = options.find((item) => item.value === value);
+  if (!option) return;
+
+  const selected = getSelectedGenres();
+  if (option.selected && selected.length <= 1) {
+    option.selected = true;
+  } else {
+    option.selected = !option.selected;
+  }
 }
 
 function updateModeButtons() {
@@ -839,7 +895,7 @@ function setupEvents() {
 
   document.querySelectorAll("[data-genre-chip]").forEach((button) => {
     button.addEventListener("click", () => {
-      fields.genre.value = button.dataset.genreChip;
+      toggleGenre(button.dataset.genreChip);
       updateOutput();
     });
   });

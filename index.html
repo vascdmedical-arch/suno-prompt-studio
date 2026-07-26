@@ -52,8 +52,8 @@
 
           <div class="two-col">
             <label class="field">
-              <span>ジャンル</span>
-              <select id="genre" name="genre">
+              <span>ジャンル（複数選択）</span>
+              <select id="genre" class="genre-select" name="genre" multiple size="8">
                 <optgroup label="日本・韓国ポップ">
                   <option value="J-pop">J-pop</option>
                   <option value="K-pop">K-pop</option>
@@ -120,6 +120,7 @@
                 </optgroup>
                 <option value="Custom">Custom</option>
               </select>
+              <small class="field-hint">チップを押すと追加・解除できます。</small>
             </label>
 
             <label class="field custom-genre-field" id="customGenreField">

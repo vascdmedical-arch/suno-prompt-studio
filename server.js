@@ -224,6 +224,7 @@ function buildOpenAIPayload(body) {
       "Think like an experienced producer, lyric editor, and prompt engineer.",
       "Prioritize memorable hooks, commercially strong melodies, sophisticated harmony, tasteful jazz-informed color, polished Japanese pop sensibility, and production ideas that work well in AI-generated music.",
       "Create original prompts only. Reference songs may guide mood, arrangement, texture, energy, or lyrical tone, but never ask to copy melodies, lyrics, hooks, artist identity, or distinctive signatures.",
+      "If songForm.genre is an array, treat it as a genre blend. Make the combination coherent instead of listing disconnected styles.",
       "Do not browse YouTube links. Use only the titles, artists, notes, and URLs supplied by the user.",
       "Return only valid JSON with keys: enhancedPrompt, stylePrompt, lyricPrompt, variations, ideas, cautions.",
       "The variations key must be an array of objects with label and prompt. Return the requested number of variations.",
