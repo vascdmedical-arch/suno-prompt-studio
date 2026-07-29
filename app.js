@@ -1110,10 +1110,11 @@ async function refineWithAI() {
       throw new Error(getApiErrorMessage(result, "ChatGPT連携に失敗しました"));
     }
 
-    state.aiEnhancedPrompt = resultData.enhancedPrompt || "";
-    state.aiVariations = Array.isArray(resultData.variations) ? resultData.variations : [];
-    state.aiText = formatAiResult(resultData);
-    addHistoryItem(resultData, data);
+    const normalizedResult = normalizeAiResult(resultData);
+    state.aiEnhancedPrompt = normalizedResult.enhancedPrompt || "";
+    state.aiVariations = Array.isArray(normalizedResult.variations) ? normalizedResult.variations : [];
+    state.aiText = formatAiResult(normalizedResult);
+    addHistoryItem(normalizedResult, data);
     setActiveTab("ai");
     updateOutput();
     setStatus("AI結果を作成しました");
@@ -1233,6 +1234,7 @@ function setAiBusy(isBusy) {
 }
 
 function formatAiResult(result) {
+  result = normalizeAiResult(result);
   const sections = [];
 
   if (result.enhancedPrompt) {
@@ -1267,6 +1269,20 @@ function formatAiResult(result) {
   }
 
   return sections.join("\n\n").trim() || "AI結果が空でした。";
+}
+
+function normalizeAiResult(result) {
+  if (!result || typeof result !== "object") return {};
+  const nested = parseJson(String(result.enhancedPrompt || "").trim(), null);
+  if (!nested || typeof nested !== "object" || !nested.enhancedPrompt) return result;
+
+  return {
+    ...result,
+    ...nested,
+    variations: Array.isArray(nested.variations) ? nested.variations : result.variations,
+    ideas: Array.isArray(nested.ideas) ? nested.ideas : result.ideas,
+    cautions: Array.isArray(nested.cautions) ? nested.cautions : result.cautions,
+  };
 }
 
 async function copyOutput() {
