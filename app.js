@@ -2,6 +2,9 @@ const STORAGE_KEY = "suno-prompt-studio:v1";
 const HISTORY_KEY = "suno-prompt-studio:history:v1";
 const API_BASE_KEY = "suno-prompt-studio:api-base:v1";
 const DEFAULT_API_BASE = "https://suno-prompt-studio-api.onrender.com";
+const API_HEALTH_TIMEOUT_MS = 12000;
+const API_TEST_TIMEOUT_MS = 45000;
+const API_REFINE_TIMEOUT_MS = 90000;
 
 const fields = {
   title: document.querySelector("#title"),
@@ -984,6 +987,45 @@ function getApiUrl(path) {
   return `${apiBase}${path}`;
 }
 
+async function fetchApiJson(path, options = {}, timeoutMs = API_TEST_TIMEOUT_MS) {
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(getApiUrl(path), {
+      ...options,
+      signal: controller.signal,
+    });
+    const raw = await response.text();
+    return {
+      response,
+      data: parseJson(raw, {}),
+      raw,
+    };
+  } catch (error) {
+    if (error.name === "AbortError") {
+      throw new Error("APIの応答がありません。Renderがスリープ中または停止中です。少し待って再試行してください。");
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timer);
+  }
+}
+
+function parseJson(text, fallback) {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return fallback;
+  }
+}
+
+function getApiErrorMessage(result, fallback) {
+  if (result?.data?.error) return result.data.error;
+  if (result?.raw) return result.raw;
+  return fallback;
+}
+
 async function checkApiStatus() {
   fields.apiBase.value = apiBase;
   setApiStatus("API確認中", "muted");
@@ -997,17 +1039,16 @@ async function checkApiStatus() {
   }
 
   try {
-    const response = await fetch(getApiUrl("/api/health"));
+    const { response, data } = await fetchApiJson("/api/health", {}, API_HEALTH_TIMEOUT_MS);
     if (!response.ok) throw new Error("API health check failed");
-    const data = await response.json();
     state.apiReady = Boolean(data.hasApiKey);
     elements.apiModel.textContent = data.model || "model";
     elements.aiButton.disabled = !state.apiReady;
     setApiStatus(state.apiReady ? "API接続済み" : "キー未設定", state.apiReady ? "ready" : "warn");
-  } catch {
+  } catch (error) {
     state.apiReady = false;
     elements.aiButton.disabled = true;
-    setApiStatus("API未接続", "warn");
+    setApiStatus(error.message.includes("APIの応答") ? "API応答なし" : "API未接続", "warn");
   }
 }
 
@@ -1021,15 +1062,15 @@ async function testApiConnection() {
   setStatus("API接続を確認しています");
 
   try {
-    const response = await fetch(getApiUrl("/api/test"), { method: "POST" });
-    const result = await response.json();
-    if (!response.ok || !result.ok) {
-      throw new Error(result.error || "API接続テストに失敗しました");
+    const result = await fetchApiJson("/api/test", { method: "POST" }, API_TEST_TIMEOUT_MS);
+    const { response, data } = result;
+    if (!response.ok || !data.ok) {
+      throw new Error(getApiErrorMessage(result, "API接続テストに失敗しました"));
     }
 
     state.apiReady = true;
     elements.aiButton.disabled = false;
-    elements.apiModel.textContent = result.model || elements.apiModel.textContent;
+    elements.apiModel.textContent = data.model || elements.apiModel.textContent;
     setApiStatus("API接続済み", "ready");
     setStatus("API接続テストに成功しました");
   } catch (error) {
@@ -1049,26 +1090,30 @@ async function refineWithAI() {
   setStatus("ChatGPTで考えています");
 
   try {
-    const response = await fetch(getApiUrl("/api/refine"), {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        formData: data,
-        currentPrompt,
-        aiMode: data.aiMode,
-        aiCount: data.aiCount,
-        aiInstruction: data.aiInstruction,
-      }),
-    });
-    const result = await response.json();
-    if (!response.ok || !result.ok) {
-      throw new Error(result.error || "ChatGPT連携に失敗しました");
+    const result = await fetchApiJson(
+      "/api/refine",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          formData: data,
+          currentPrompt,
+          aiMode: data.aiMode,
+          aiCount: data.aiCount,
+          aiInstruction: data.aiInstruction,
+        }),
+      },
+      API_REFINE_TIMEOUT_MS,
+    );
+    const { response, data: resultData } = result;
+    if (!response.ok || !resultData.ok) {
+      throw new Error(getApiErrorMessage(result, "ChatGPT連携に失敗しました"));
     }
 
-    state.aiEnhancedPrompt = result.enhancedPrompt || "";
-    state.aiVariations = Array.isArray(result.variations) ? result.variations : [];
-    state.aiText = formatAiResult(result);
-    addHistoryItem(result, data);
+    state.aiEnhancedPrompt = resultData.enhancedPrompt || "";
+    state.aiVariations = Array.isArray(resultData.variations) ? resultData.variations : [];
+    state.aiText = formatAiResult(resultData);
+    addHistoryItem(resultData, data);
     setActiveTab("ai");
     updateOutput();
     setStatus("AI結果を作成しました");

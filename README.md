@@ -8,7 +8,7 @@ ChatGPT連携ありで使う場合:
 
 ```text
 OPENAI_API_KEY=sk-...
-OPENAI_MODEL=gpt-5.6-luna
+OPENAI_MODEL=gpt-5-mini
 ```
 
 2. 起動します。
@@ -36,7 +36,7 @@ http://127.0.0.1:4173/
 任意でモデルを変える場合:
 
 ```bash
-OPENAI_MODEL="gpt-5.6-terra" /Users/kondohkeisuke/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node server.js
+OPENAI_MODEL="gpt-5-mini" /Users/kondohkeisuke/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node server.js
 ```
 
 APIキーなしでも画面は開けますが、「ChatGPTで考える」は使えません。

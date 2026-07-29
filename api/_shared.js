@@ -1,5 +1,6 @@
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
-const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-5.6-luna";
+const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-5-mini";
+const OPENAI_TIMEOUT_MS = Number(process.env.OPENAI_TIMEOUT_MS || 70_000);
 
 function sendJson(res, status, payload) {
   res.statusCode = status;
@@ -42,19 +43,42 @@ function requireApiKey(res) {
 }
 
 async function callOpenAI(payload) {
-  const response = await fetch("https://api.openai.com/v1/responses", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${OPENAI_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), OPENAI_TIMEOUT_MS);
 
-  const requestId = response.headers.get("x-request-id") || "";
-  const raw = await response.text();
-  const data = parseJson(raw, {});
-  return { data, ok: response.ok, raw, requestId, status: response.status };
+  try {
+    const response = await fetch("https://api.openai.com/v1/responses", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+
+    const requestId = response.headers.get("x-request-id") || "";
+    const raw = await response.text();
+    const data = parseJson(raw, {});
+    return { data, ok: response.ok, raw, requestId, status: response.status };
+  } catch (error) {
+    const isTimeout = error.name === "AbortError";
+    return {
+      data: {
+        error: {
+          message: isTimeout
+            ? "OpenAI API request timed out. Please try again."
+            : error.message || "OpenAI API request failed",
+        },
+      },
+      ok: false,
+      raw: "",
+      requestId: "",
+      status: isTimeout ? 504 : 502,
+    };
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 function buildOpenAIPayload(body) {

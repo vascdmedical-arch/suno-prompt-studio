@@ -24,6 +24,6 @@ Renderを間に挟む構成はおすすめです。
 - Start Command: `npm start`
 - Environment Variable:
   - `OPENAI_API_KEY`: 自分のOpenAI APIキー
-  - `OPENAI_MODEL`: `gpt-5.6-luna`
+  - `OPENAI_MODEL`: `gpt-5-mini`
 
 RenderではWeb Serviceが `PORT` 環境変数にバインドする必要があります。このアプリはRender上では自動で `0.0.0.0` と `PORT` を使います。

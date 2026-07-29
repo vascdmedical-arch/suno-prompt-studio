@@ -9,7 +9,8 @@ const IS_RENDER = Boolean(process.env.RENDER || process.env.RENDER_SERVICE_ID);
 const PORT = Number(process.env.PORT || 4173);
 const HOST = process.env.HOST || (IS_RENDER ? "0.0.0.0" : "127.0.0.1");
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
-const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-5.6-luna";
+const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-5-mini";
+const OPENAI_TIMEOUT_MS = Number(process.env.OPENAI_TIMEOUT_MS || 70_000);
 const ROOT = __dirname;
 
 const MIME_TYPES = {
@@ -124,14 +125,8 @@ async function handleRefine(req, res) {
 
   const body = await readJson(req);
   const apiPayload = buildOpenAIPayload(body);
-  const response = await fetch("https://api.openai.com/v1/responses", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${OPENAI_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(apiPayload),
-  });
+  const response = await callOpenAI(apiPayload, res);
+  if (!response) return;
 
   const requestId = response.headers.get("x-request-id") || "";
   const raw = await response.text();
@@ -178,18 +173,15 @@ async function handleApiTest(req, res) {
     return;
   }
 
-  const response = await fetch("https://api.openai.com/v1/responses", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${OPENAI_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
+  const response = await callOpenAI(
+    {
       model: OPENAI_MODEL,
       input: "Return OK as plain text.",
       max_output_tokens: 16,
-    }),
-  });
+    },
+    res,
+  );
+  if (!response) return;
 
   const raw = await response.text();
   const data = parseJson(raw, {});
@@ -248,6 +240,35 @@ function buildOpenAIPayload(body) {
       verbosity: "medium",
     },
   };
+}
+
+async function callOpenAI(payload, res) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), OPENAI_TIMEOUT_MS);
+
+  try {
+    return await fetch("https://api.openai.com/v1/responses", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+  } catch (error) {
+    const isTimeout = error.name === "AbortError";
+    sendJson(res, isTimeout ? 504 : 502, {
+      ok: false,
+      code: isTimeout ? "openai_timeout" : "openai_request_failed",
+      error: isTimeout
+        ? "OpenAI API request timed out. Please try again."
+        : error.message || "OpenAI API request failed",
+    });
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 function buildResponseFormatSchema() {
