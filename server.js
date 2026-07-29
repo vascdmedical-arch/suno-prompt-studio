@@ -142,7 +142,7 @@ async function handleRefine(req, res) {
   }
 
   const outputText = extractOutputText(data);
-  const parsed = parseAssistantJson(outputText);
+  const parsed = normalizeParsedResult(parseAssistantJson(outputText));
   const variations = Array.isArray(parsed.variations) ? parsed.variations : [];
   const firstVariationPrompt = variations.find((variation) => variation && variation.prompt)?.prompt || "";
   sendJson(res, 200, {
@@ -219,6 +219,7 @@ function buildOpenAIPayload(body) {
       "If songForm.genre is an array, treat it as a genre blend. Make the combination coherent instead of listing disconnected styles.",
       "Do not browse YouTube links. Use only the titles, artists, notes, and URLs supplied by the user.",
       "Return only valid JSON with keys: enhancedPrompt, stylePrompt, lyricPrompt, variations, ideas, cautions.",
+      "Do not put a JSON object inside enhancedPrompt. enhancedPrompt must be a plain paste-ready Suno prompt string.",
       "The variations key must be an array of objects with label and prompt. Return the requested number of variations.",
       "Keep enhancedPrompt ready to paste into Suno. Use English for technical music/style tags, and preserve Japanese when the song concept or lyric language is Japanese.",
       "If songForm.promptMode is simple3000, keep enhancedPrompt and every variation prompt within 3000 characters. If it is advanced1000, keep them within 1000 characters while preserving the strongest style, lyric, and arrangement direction.",
@@ -337,6 +338,20 @@ function parseAssistantJson(text) {
   const match = text.match(/\{[\s\S]*\}/);
   if (!match) return {};
   return parseJson(match[0], {});
+}
+
+function normalizeParsedResult(parsed) {
+  if (!parsed || typeof parsed !== "object") return {};
+  const nested = typeof parsed.enhancedPrompt === "string" ? parseAssistantJson(parsed.enhancedPrompt.trim()) : {};
+  if (!nested || typeof nested !== "object" || !nested.enhancedPrompt) return parsed;
+
+  return {
+    ...parsed,
+    ...nested,
+    variations: Array.isArray(nested.variations) ? nested.variations : parsed.variations,
+    ideas: Array.isArray(nested.ideas) ? nested.ideas : parsed.ideas,
+    cautions: Array.isArray(nested.cautions) ? nested.cautions : parsed.cautions,
+  };
 }
 
 function parseJson(text, fallback) {
