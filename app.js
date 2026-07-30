@@ -118,6 +118,9 @@ const sampleData = {
       title: "Plastic Love",
       artist: "Mariya Takeuchi",
       url: "https://www.youtube.com/watch?v=9Gj47G2e1Jc",
+      bpm: "",
+      key: "",
+      meter: "mid-tempo city-pop groove",
       focus: "mood",
       notes: "night-drive sparkle and bittersweet chorus lift",
     },
@@ -126,6 +129,9 @@ const sampleData = {
       title: "Midnight Pretenders",
       artist: "Tomoko Aran",
       url: "",
+      bpm: "",
+      key: "",
+      meter: "sleek late-night groove",
       focus: "sound design",
       notes: "sleek bass, glassy keys, restrained elegance",
     },
@@ -277,6 +283,9 @@ function normalizeReference(ref) {
     title: ref.title || "",
     artist: ref.artist || "",
     url: ref.url || "",
+    bpm: ref.bpm || "",
+    key: ref.key || "",
+    meter: ref.meter || "",
     focus: ref.focus || "mood",
     notes: ref.notes || "",
   };
@@ -290,6 +299,9 @@ function addReference(shouldRender = true) {
       title: "",
       artist: "",
       url: "",
+      bpm: "",
+      key: "",
+      meter: "",
       focus: "mood",
       notes: "",
     }),
@@ -413,16 +425,28 @@ function buildStyleTags(data) {
 function buildReferenceLines(data, language = "en") {
   if (!data.includeRefs) return [];
   return data.references
-    .filter((ref) => ref.title || ref.artist || ref.url || ref.notes)
+    .filter((ref) => ref.title || ref.artist || ref.url || ref.bpm || ref.key || ref.meter || ref.notes)
     .map((ref, index) => {
       const name = [ref.title, ref.artist].filter(Boolean).join(" - ") || `Reference ${index + 1}`;
       const source = ref.url ? ` (${ref.url})` : "";
-      const notes = ref.notes ? `: ${ref.notes}` : "";
+      const meta = buildReferenceMeta(ref, language);
+      const notes = ref.notes ? (language === "ja" ? `メモ: ${ref.notes}` : `notes: ${ref.notes}`) : "";
+      const details = [language === "ja" ? `参考点: ${translateFocus(ref.focus)}` : `focus: ${ref.focus}`, meta, notes]
+        .filter(Boolean)
+        .join(" / ");
       if (language === "ja") {
-        return `- ${name}${source} / 参考点: ${translateFocus(ref.focus)}${notes}`;
+        return `- ${name}${source} / ${details}`;
       }
-      return `- ${name}${source} / focus: ${ref.focus}${notes}`;
+      return `- ${name}${source} / ${details}`;
     });
+}
+
+function buildReferenceMeta(ref, language = "en") {
+  const items = [];
+  if (ref.bpm) items.push(`BPM: ${ref.bpm}`);
+  if (ref.key) items.push(language === "ja" ? `キー: ${ref.key}` : `key: ${ref.key}`);
+  if (ref.meter) items.push(language === "ja" ? `拍子・グルーヴ: ${ref.meter}` : `meter/groove: ${ref.meter}`);
+  return items.join(" / ");
 }
 
 function translateFocus(focus) {
