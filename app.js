@@ -1341,7 +1341,16 @@ function setStatus(message) {
 }
 
 function exportData() {
-  const blob = new Blob([JSON.stringify(getFormData(), null, 2)], { type: "application/json" });
+  const formData = getFormData();
+  const exportPayload = {
+    ...formData,
+    pipelineVersion: 1,
+    stylePrompt: state.aiEnhancedPrompt || state.appliedAiPrompt || buildFinalPrompt(formData),
+    lyrics: formData.lyricsMode === "full" ? formData.lyricDraft : "",
+    instrumental: formData.lyricsMode === "instrumental" || formData.vocal === "instrumental",
+    exportedAt: new Date().toISOString(),
+  };
+  const blob = new Blob([JSON.stringify(exportPayload, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   const title = fields.title.value.trim().replace(/[^\w-]+/g, "-") || "suno-prompt";
